@@ -307,26 +307,18 @@ int main() {
             // station 0:
             cout << tr.stations[0] << ' ' << "xx-xx xx:xx" << " -> " << formatMDHM(start.dayIdx, start.hour, start.min) << ' ' << 0 << ' ' << tr.seatNum << '\n';
             int cumPrice = 0;
-            TimeAccum curArr = start; // arrival at station i (for i>0 computed)
+            TimeAccum t = start;
             for (int i = 1; i < tr.stationNum; ++i) {
-                // arrive at station i
-                curArr = addMinutes(curArr, tr.travel[i-1]);
-                // leave time
-                TimeAccum leave = curArr;
-                if (i != tr.stationNum-1) leave = addMinutes(curArr, tr.stopover[i-1]);
+                TimeAccum arr = addMinutes(t, tr.travel[i-1]);
+                TimeAccum leave = arr;
+                if (i != tr.stationNum-1) leave = addMinutes(arr, tr.stopover[i-1]);
                 cumPrice += tr.prices[i-1];
-                string arrStr = formatMDHM(curArr.dayIdx, curArr.hour, curArr.min);
-                string leaveStr;
-                int seatShow = tr.seatNum;
-                if (i == tr.stationNum-1) {
-                    leaveStr = "xx-xx xx:xx";
-                    seatShow = 0; // x in output
-                } else {
-                    leaveStr = formatMDHM(leave.dayIdx, leave.hour, leave.min);
-                }
-                    cout << tr.stations[i] << ' ' << arrStr << " -> " << leaveStr << ' ' << cumPrice << ' ';
-                if (i==tr.stationNum-1) cout << 'x'; else cout << seatShow;
+                string arrStr = formatMDHM(arr.dayIdx, arr.hour, arr.min);
+                string leaveStr = (i==tr.stationNum-1) ? "xx-xx xx:xx" : formatMDHM(leave.dayIdx, leave.hour, leave.min);
+                cout << tr.stations[i] << ' ' << arrStr << " -> " << leaveStr << ' ' << cumPrice << ' ';
+                if (i==tr.stationNum-1) cout << 'x'; else cout << tr.seatNum;
                 cout << '\n';
+                t = leave;
             }
         } else if (cmd == "delete_train") {
             string tid = get("i");

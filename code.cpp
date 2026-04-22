@@ -330,7 +330,7 @@ int main() {
         } else if (cmd == "query_ticket") {
             // -s -t -d (-p time)
             string sfrom = get("s"), sto = get("t"), dd = get("d");
-            string pref = get("p"); if (pref.empty()) pref = "cost";
+            string pref = get("p"); if (pref.empty()) pref = "time";
             int targetDay = monthDayToIndex(dd);
             TicketItem items[2000]; int ic = 0;
             for (int ti = 0; ti < trainCount; ++ti) {

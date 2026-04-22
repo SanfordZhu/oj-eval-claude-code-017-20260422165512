@@ -7,5 +7,5 @@ add_executable(code code.cpp)
 
 # Optimize for performance
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_compile_options(code PRIVATE -O2 -pipe -static -s)
+  target_compile_options(code PRIVATE -O2 -pipe -s)
 endif()

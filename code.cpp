@@ -32,8 +32,8 @@ struct Train {
 };
 
 // capacities
-static const int MAX_USERS = 20000;
-static const int MAX_TRAINS = 20000;
+static const int MAX_USERS = 5000;
+static const int MAX_TRAINS = 800;
 
 User users[MAX_USERS];
 Train trains[MAX_TRAINS];
@@ -340,7 +340,7 @@ int main() {
             string sfrom = get("s"), sto = get("t"), dd = get("d");
             string pref = get("p"); if (pref.empty()) pref = "cost";
             int targetDay = monthDayToIndex(dd);
-            TicketItem items[10005]; int ic = 0;
+            TicketItem items[2000]; int ic = 0;
             for (int ti = 0; ti < trainCount; ++ti) {
                 Train &tr = trains[ti]; if (!tr.exists) continue; if (!tr.released) continue;
                 // find indices of sfrom and sto

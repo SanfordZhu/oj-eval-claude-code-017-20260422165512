@@ -352,49 +352,28 @@ int main() {
                     if (tr.stations[i] == sto) { b = i; break; }
                 }
                 if (a == -1 || b == -1 || a >= b) continue;
-                // compute departure time at station a when starting day D leads to departure at targetDay
-                // First compute schedule from starting station day S to station a leave time
-                // Build cumulative minutes to reach leave at station a
-                int cumMin = 0;
+                // compute cumulative minutes from start to LEAVE at station a
+                int cumMinLeaveA = 0;
                 for (int i = 1; i <= a; ++i) {
-                    cumMin += tr.travel[i-1];
-                    if (i != tr.stationNum-1) {
-                        if (i != a) cumMin += tr.stopover[i-1];
-                    }
+                    cumMinLeaveA += tr.travel[i-1];
+                    if (i != tr.stationNum-1) cumMinLeaveA += tr.stopover[i-1];
                 }
-                // departure time at station a is arrival at i=a then stopover added except for a==terminal which cannot happen since a<b<=terminal-1
-                // Actually cumMin now equals arrival at station a plus stopover before leaving (we excluded stopover at a itself).
-                // departure at a: arrival + stopover[a-1]
-                if (a != tr.stationNum-1) cumMin += tr.stopover[a-1];
-                // Determine start day S so that (saleStart <= S <= saleEnd) and day of leave at a equals targetDay
-                // Starting at saleStart..saleEnd, leave day at a = S plus day increments from startHour/min+cumMin
-                // We'll compute base day offset from startHour/min+cumMin crossing days
-                int addDays = ((tr.startHour*60 + tr.startMin + cumMin) / (60*24));
+                // Determine start day S so that leave day at a equals targetDay
+                int addDays = ((tr.startHour*60 + tr.startMin + cumMinLeaveA) / (60*24));
                 int S = targetDay - addDays;
                 if (S < tr.saleStart || S > tr.saleEnd) continue;
                 // Build leave and arrive times strings and price, seat
                 TimeAccum start{S, tr.startHour, tr.startMin};
-                // Arrival at station a (after travel to a)
-                TimeAccum arrA = start;
-                for (int i = 1; i <= a; ++i) arrA = addMinutes(arrA, tr.travel[i-1]);
-                TimeAccum leaveA = addMinutes(arrA, tr.stopover[a-1]);
-                // Now compute arrival at station b
-                TimeAccum cur = arrA;
-                int price = 0;
-                for (int i = a+1; i <= b; ++i) {
-                    price += tr.prices[i-1];
-                    cur = addMinutes(cur, tr.stopover[i-1]); // stop at i-1 before leaving (for i<=terminal-1)
-                    cur = addMinutes(cur, tr.travel[i-1]);
-                }
-                // The above over-counts stopover: at i=a+1 we should leave station a after stopover; we added stopover[a] though? This is tricky — simplify: recompute properly.
-                // Recompute cleanly:
-                price = 0; TimeAccum tcur = start;
+                // Leave time at station a
+                TimeAccum tcur = start;
                 for (int i = 1; i <= a; ++i) {
                     tcur = addMinutes(tcur, tr.travel[i-1]);
                     if (i != tr.stationNum-1) tcur = addMinutes(tcur, tr.stopover[i-1]);
                 }
-                TimeAccum leave = tcur; // leave at station a
+                TimeAccum leave = tcur;
                 string leaveStr = formatMDHM(leave.dayIdx, leave.hour, leave.min);
+                // Arrival at station b
+                int price = 0;
                 TimeAccum tcur2 = leave;
                 for (int i = a+1; i <= b; ++i) {
                     tcur2 = addMinutes(tcur2, tr.travel[i-1]);
